@@ -12,12 +12,8 @@ const Login = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Email admin ditetapkan dan tidak dapat diubah dari UI.
-  const email = 'penmadkotatasik@gmail.com';
-  
-  // PERINGATAN: Menyimpan password di kode frontend sangat tidak aman.
-  // Ini hanya untuk tujuan demonstrasi.
-  const [password, setPassword] = useState('kuatkuat123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,9 +77,9 @@ const Login = () => {
                 id="email"
                 type="email"
                 value={email}
-                readOnly
-                className="bg-gray-100 focus-visible:ring-0 focus-visible:ring-offset-0"
+                onChange={(e) => setEmail(e.target.value)}
                 required
+                autoFocus
               />
             </div>
             <div className="space-y-2">
@@ -94,7 +90,6 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                autoFocus
               />
             </div>
             {error && (
