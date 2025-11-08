@@ -232,7 +232,7 @@ const Index = () => {
         settings={settings}
         onSettingsSave={handleSettingsSave}
       />
-      <main className="container mx-auto p-4 md:p-8 space-y-8">
+      <main className="mx-auto p-4 space-y-8">
         <Player 
           station={currentStation}
           isPlaying={isPlaying}
