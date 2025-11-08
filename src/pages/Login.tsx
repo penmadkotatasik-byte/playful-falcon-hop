@@ -5,16 +5,18 @@ import type { Session } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const Login = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // PERINGATAN: Menyimpan kredensial di kode frontend sangat tidak aman.
+  // Email admin ditetapkan dan tidak dapat diubah dari UI.
+  const email = 'penmadkotatasik@gmail.com';
+  
+  // PERINGATAN: Menyimpan password di kode frontend sangat tidak aman.
   // Ini hanya untuk tujuan demonstrasi.
-  const [email, setEmail] = useState('penmadkotatasik@gmail.com');
   const [password, setPassword] = useState('kuatkuat123');
   
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +81,8 @@ const Login = () => {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                readOnly
+                className="bg-gray-100 focus-visible:ring-0 focus-visible:ring-offset-0"
                 required
               />
             </div>
@@ -91,6 +94,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoFocus
               />
             </div>
             {error && (
