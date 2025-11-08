@@ -1,0 +1,85 @@
+import React, { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { PlusCircle } from 'lucide-react';
+
+interface Station {
+  name: string;
+  url: string;
+  icon?: string;
+  color?: string;
+}
+
+interface AddStationDialogProps {
+  onAddStation: (station: Station) => void;
+}
+
+const AddStationDialog = ({ onAddStation }: AddStationDialogProps) => {
+  const [name, setName] = useState('');
+  const [url, setUrl] = useState('');
+  const [color, setColor] = useState('#e2e8f0');
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleSubmit = () => {
+    if (name && url) {
+      onAddStation({ name, url, color });
+      setName('');
+      setUrl('');
+      setColor('#e2e8f0');
+      setIsOpen(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button>
+          <PlusCircle className="mr-2 h-4 w-4" /> Add Station
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Add New Radio Station</DialogTitle>
+          <DialogDescription>
+            Enter the details for the new radio station.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="name" className="text-right">
+              Name
+            </Label>
+            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="url" className="text-right">
+              Stream URL
+            </Label>
+            <Input id="url" value={url} onChange={(e) => setUrl(e.target.value)} className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="color" className="text-right">
+              Color
+            </Label>
+            <Input id="color" type="color" value={color} onChange={(e) => setColor(e.target.value)} className="col-span-3 h-10" />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="submit" onClick={handleSubmit}>Save station</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default AddStationDialog;
