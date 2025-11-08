@@ -93,6 +93,7 @@ const Index = () => {
     const { data, error } = await supabase
       .from('stations')
       .select('*')
+      .order('city', { ascending: true, nullsFirst: false })
       .order('name', { ascending: true });
 
     if (error) {
@@ -195,11 +196,16 @@ const Index = () => {
   const handleSortToggle = () => {
     const newOrder = sortOrder === 'asc' ? 'desc' : 'asc';
     const sortedStations = [...stations].sort((a, b) => {
-      if (newOrder === 'asc') {
-        return a.name.localeCompare(b.name);
-      } else {
-        return b.name.localeCompare(a.name);
+      const cityA = a.city || '\uffff'; // Use a high-value character to sort nulls/empty last
+      const cityB = b.city || '\uffff';
+
+      let comparison = cityA.localeCompare(cityB);
+      
+      if (comparison === 0) {
+        comparison = a.name.localeCompare(b.name);
       }
+
+      return newOrder === 'asc' ? comparison : -comparison;
     });
     setStations(sortedStations);
     setSortOrder(newOrder);
