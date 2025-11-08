@@ -5,15 +5,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
 import SettingsSheet, { AppSettings } from './SettingsSheet';
-import VisitorCounter from './VisitorCounter';
+import OnlineCounter from './OnlineCounter';
 
 interface HeaderProps {
   session: Session | null;
   settings: AppSettings;
   onSettingsSave: (settings: AppSettings) => void;
+  onlineCount: number;
 }
 
-const Header = ({ session, settings, onSettingsSave }: HeaderProps) => {
+const Header = ({ session, settings, onSettingsSave, onlineCount }: HeaderProps) => {
   const navigate = useNavigate();
   const [clickCount, setClickCount] = useState(0);
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -45,7 +46,7 @@ const Header = ({ session, settings, onSettingsSave }: HeaderProps) => {
     <header className="bg-card border-b p-4 sticky top-0 z-10">
       <div className="relative mx-auto flex items-center justify-between">
         <div className="absolute left-0 flex items-center">
-          <VisitorCounter />
+          <OnlineCounter count={onlineCount} />
         </div>
         <div
           className="flex items-center gap-3 sm:gap-4 cursor-pointer mx-auto"

@@ -6,7 +6,7 @@ import AddStationDialog from '@/components/AddStationDialog';
 import { Footer } from "@/components/Footer";
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import type { Session } from '@supabase/supabase-js';
+import type { Session, RealtimeChannel } from '@supabase/supabase-js';
 import type { AppSettings } from '@/components/SettingsSheet';
 import RunningInfo from '@/components/RunningInfo';
 
@@ -41,6 +41,47 @@ const Index = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [onlineCount, setOnlineCount] = useState(0);
+  const [channel, setChannel] = useState<RealtimeChannel | null>(null);
+
+  // Effect for Realtime Presence
+  useEffect(() => {
+    const presenceChannel = supabase.channel('radio-listeners', {
+      config: {
+        presence: {
+          key: session?.user.id || new Date().getTime().toString(), // Unique key for each user
+        },
+      },
+    });
+
+    presenceChannel
+      .on('presence', { event: 'sync' }, () => {
+        const presenceState = presenceChannel.presenceState();
+        const count = Object.values(presenceState)
+          .flat()
+          // @ts-ignore
+          .filter(p => p.is_listening).length;
+        setOnlineCount(count);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await presenceChannel.track({ is_listening: isPlaying });
+        }
+      });
+
+    setChannel(presenceChannel);
+
+    return () => {
+      supabase.removeChannel(presenceChannel);
+    };
+  }, [session]);
+
+  // Effect to update presence when play state changes
+  useEffect(() => {
+    if (channel?.state === 'joined') {
+      channel.track({ is_listening: isPlaying });
+    }
+  }, [isPlaying, channel]);
 
   // Load settings from localStorage on initial render
   useEffect(() => {
@@ -238,6 +279,7 @@ const Index = () => {
         session={session} 
         settings={settings}
         onSettingsSave={handleSettingsSave}
+        onlineCount={onlineCount}
       />
       <main className="mx-auto p-4 space-y-8">
         <Player 
