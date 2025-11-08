@@ -55,23 +55,23 @@ const AddStationDialog = ({ onAddStation }: AddStationDialogProps) => {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
+          <div className="space-y-2">
+            <Label htmlFor="name">
               Name
             </Label>
-            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" />
+            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="url" className="text-right">
+          <div className="space-y-2">
+            <Label htmlFor="url">
               Stream URL
             </Label>
-            <Input id="url" value={url} onChange={(e) => setUrl(e.target.value)} className="col-span-3" />
+            <Input id="url" value={url} onChange={(e) => setUrl(e.target.value)} />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="color" className="text-right">
+          <div className="space-y-2">
+            <Label htmlFor="color">
               Color
             </Label>
-            <Input id="color" type="color" value={color} onChange={(e) => setColor(e.target.value)} className="col-span-3 h-10" />
+            <Input id="color" type="color" value={color} onChange={(e) => setColor(e.target.value)} className="h-10 w-full" />
           </div>
         </div>
         <DialogFooter>
