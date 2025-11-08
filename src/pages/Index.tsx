@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import type { Session } from '@supabase/supabase-js';
+import type { BackgroundSettings } from '@/components/SettingsSheet';
 
 interface Station {
   id: number;
@@ -16,11 +17,40 @@ interface Station {
   color?: string;
 }
 
+const defaultSettings: BackgroundSettings = {
+  type: 'color',
+  color1: '#f1f5f9', // slate-100
+  color2: '#cbd5e1', // slate-300
+  imageUrl: '',
+};
+
 const Index = () => {
   const [stations, setStations] = useState<Station[]>([]);
   const [currentStation, setCurrentStation] = useState<Station | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
+  const [backgroundSettings, setBackgroundSettings] = useState<BackgroundSettings>(defaultSettings);
+
+  // Load settings from localStorage on initial render
+  useEffect(() => {
+    try {
+      const savedSettings = localStorage.getItem('backgroundSettings');
+      if (savedSettings) {
+        setBackgroundSettings(JSON.parse(savedSettings));
+      }
+    } catch (error) {
+      console.error("Failed to parse background settings from localStorage", error);
+    }
+  }, []);
+
+  // Save settings to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('backgroundSettings', JSON.stringify(backgroundSettings));
+    } catch (error) {
+      console.error("Failed to save background settings to localStorage", error);
+    }
+  }, [backgroundSettings]);
 
   useEffect(() => {
     const getSession = async () => {
@@ -136,11 +166,34 @@ const Index = () => {
     }
   };
 
+  const getBackgroundStyle = (): React.CSSProperties => {
+    const { type, color1, color2, imageUrl } = backgroundSettings;
+    switch (type) {
+      case 'color':
+        return { backgroundColor: color1 };
+      case 'gradient':
+        return { backgroundImage: `linear-gradient(to bottom right, ${color1}, ${color2})` };
+      case 'image':
+        return { 
+          backgroundImage: `url(${imageUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        };
+      default:
+        return { backgroundColor: '#f1f5f9' };
+    }
+  };
+
   const isAdmin = !!session;
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Header session={session} />
+    <div className="min-h-screen text-foreground transition-all duration-500" style={getBackgroundStyle()}>
+      <Header 
+        session={session} 
+        backgroundSettings={backgroundSettings}
+        onSettingsChange={setBackgroundSettings}
+      />
       <main className="container mx-auto p-4 md:p-8 space-y-8">
         <Player 
           station={currentStation}

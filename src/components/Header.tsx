@@ -4,12 +4,15 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
+import SettingsSheet, { BackgroundSettings } from './SettingsSheet';
 
 interface HeaderProps {
   session: Session | null;
+  backgroundSettings: BackgroundSettings;
+  onSettingsChange: (settings: BackgroundSettings) => void;
 }
 
-const Header = ({ session }: HeaderProps) => {
+const Header = ({ session, backgroundSettings, onSettingsChange }: HeaderProps) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -18,7 +21,7 @@ const Header = ({ session }: HeaderProps) => {
   };
 
   return (
-    <header className="bg-card border-b p-4">
+    <header className="bg-card border-b p-4 sticky top-0 z-10">
       <div className="container mx-auto flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 sm:gap-4">
           <Radio className="h-8 w-8 text-primary" />
@@ -26,7 +29,8 @@ const Header = ({ session }: HeaderProps) => {
             <span className="hidden sm:inline">STREAMING </span>RADIO ERDE
           </h1>
         </div>
-        <div>
+        <div className="flex items-center gap-2">
+          <SettingsSheet settings={backgroundSettings} onSave={onSettingsChange} />
           {session ? (
             <Button onClick={handleLogout} variant="outline">Logout</Button>
           ) : (
