@@ -7,14 +7,6 @@ export const Footer = () => {
         <Link to="/about" className="hover:text-gray-700 dark:hover:text-gray-200">
           About
         </Link>
-        <a
-          href="https://www.dyad.sh/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-gray-700 dark:hover:text-gray-200"
-        >
-          Made with Dyad
-        </a>
       </div>
     </footer>
   );
