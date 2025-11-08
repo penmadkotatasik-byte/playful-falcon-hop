@@ -30,7 +30,7 @@ const Header = ({ session, backgroundSettings, onSettingsChange }: HeaderProps) 
           </h1>
         </div>
         <div className="flex items-center gap-2">
-          <SettingsSheet settings={backgroundSettings} onSave={onSettingsChange} />
+          {session && <SettingsSheet settings={backgroundSettings} onSave={onSettingsChange} />}
           {session ? (
             <Button onClick={handleLogout} variant="outline">Logout</Button>
           ) : (

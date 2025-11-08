@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import EditStationDialog from './EditStationDialog';
@@ -139,7 +140,9 @@ const StationList = ({ stations, currentStationId, isPlaying, onPlay, isAdmin, o
           <CardTitle>My Stations</CardTitle>
         </CardHeader>
         <CardContent>
-          {isMobile ? renderMobileList() : renderDesktopTable()}
+          <ScrollArea className="h-[450px] pr-4">
+            {isMobile ? renderMobileList() : renderDesktopTable()}
+          </ScrollArea>
         </CardContent>
       </Card>
       <EditStationDialog
