@@ -1,15 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Header from '@/components/Header';
 import Player from '@/components/Player';
 import StationList from '@/components/StationList';
-import AddStationDialog from '@/components/AddStationDialog';
 import { MadeWithDyad } from "@/components/made-with-dyad";
-
-const initialStations = [
-  { id: 1, name: 'Lofi Hip Hop Radio', url: 'https://stream.lofi.co/lofi', color: '#ef4444' },
-  { id: 2, name: 'Chillhop Radio', url: 'http://stream.zeno.fm/fyn8eh3h5f8uv', color: '#3b82f6' },
-  { id: 3, name: 'Smooth Jazz', url: 'https://s2.radio.co/s2b2b68544/listen', color: '#eab308' },
-];
+import { supabase } from '@/integrations/supabase/client';
+import { showError } from '@/utils/toast';
 
 interface Station {
   id: number;
@@ -20,10 +15,27 @@ interface Station {
 }
 
 const Index = () => {
-  const [stations, setStations] = useState(initialStations);
+  const [stations, setStations] = useState<Station[]>([]);
   const [currentStation, setCurrentStation] = useState<Station | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const fetchStations = async () => {
+      const { data, error } = await supabase
+        .from('stations')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching stations:', error);
+        showError('Could not fetch radio stations.');
+      } else if (data) {
+        setStations(data);
+      }
+    };
+
+    fetchStations();
+  }, []);
 
   const currentStationIndex = useMemo(() => {
     if (!currentStation) return -1;
@@ -59,36 +71,9 @@ const Index = () => {
     setIsPlaying(true);
   };
 
-  const handleAddStation = (newStation: Omit<Station, 'id'>) => {
-    setStations(prevStations => [
-      ...prevStations,
-      { ...newStation, id: Date.now() }
-    ]);
-  };
-
-  const handleDeleteStation = (stationId: number) => {
-    setStations(prevStations => prevStations.filter(s => s.id !== stationId));
-    if (currentStation?.id === stationId) {
-      setCurrentStation(null);
-      setIsPlaying(false);
-    }
-  };
-
-  const handleLogin = (user: string, pass: string) => {
-    if (user === 'ERDE' && pass === 'ERDE123') {
-      setIsLoggedIn(true);
-      return true;
-    }
-    return false;
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-  };
-
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Header isLoggedIn={isLoggedIn} onLogin={handleLogin} onLogout={handleLogout} />
+      <Header />
       <main className="container mx-auto p-4 md:p-8 space-y-8">
         <Player 
           station={currentStation}
@@ -99,18 +84,13 @@ const Index = () => {
         />
         
         <div>
-          {isLoggedIn && (
-            <div className="mb-6 flex justify-center">
-              <AddStationDialog onAddStation={handleAddStation} />
-            </div>
-          )}
           <StationList 
             stations={stations} 
             currentStationId={currentStation?.id || null}
             isPlaying={isPlaying}
             onPlay={handlePlayStation}
-            isAdmin={isLoggedIn}
-            onDelete={handleDeleteStation}
+            isAdmin={false}
+            onDelete={() => {}}
           />
         </div>
       </main>
