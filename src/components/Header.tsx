@@ -64,3 +64,7 @@ const Header = ({ session, settings, onSettingsSave }: HeaderProps) => {
         </div>
       </div>
     </header>
+  );
+};
+
+export default Header;
