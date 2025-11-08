@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import type { Session } from '@supabase/supabase-js';
 import type { BackgroundSettings } from '@/components/SettingsSheet';
+import RunningInfo from '@/components/RunningInfo';
 
 interface Station {
   id: number;
@@ -49,7 +50,7 @@ const Index = () => {
   useEffect(() => {
     try {
       localStorage.setItem('backgroundSettings', JSON.stringify(backgroundSettings));
-    } catch (error) {
+    } catch (error)      {
       console.error("Failed to save background settings to localStorage", error);
     }
   }, [backgroundSettings]);
@@ -245,6 +246,7 @@ const Index = () => {
           )}
         </div>
       </main>
+      <RunningInfo />
       <Footer />
     </div>
   );
