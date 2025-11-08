@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Radio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 
@@ -62,8 +62,8 @@ const Player = ({ station, isPlaying, onPlayPause, onNext, onPrevious }: PlayerP
 
   return (
     <Card>
-      <CardContent className="flex items-center justify-between p-4">
-        <div className="flex items-center gap-4 w-1/3">
+      <CardContent className="flex flex-col md:flex-row items-center justify-between p-4 gap-4 md:gap-2">
+        <div className="flex items-center gap-4 w-full md:w-1/3">
           {station ? (
             <>
               <div className="w-12 h-12 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: station.color || '#e2e8f0' }}>
@@ -91,7 +91,7 @@ const Player = ({ station, isPlaying, onPlayPause, onNext, onPrevious }: PlayerP
           </Button>
         </div>
 
-        <div className="flex items-center gap-2 w-1/3 justify-end">
+        <div className="flex items-center gap-2 w-full md:w-1/3 justify-center md:justify-end">
           <Button onClick={toggleMute} size="icon" variant="ghost">
             {isMuted || volume === 0 ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
           </Button>
@@ -100,7 +100,7 @@ const Player = ({ station, isPlaying, onPlayPause, onNext, onPrevious }: PlayerP
             max={1}
             step={0.05}
             onValueChange={handleVolumeChange}
-            className="w-[120px]"
+            className="w-full max-w-[120px]"
           />
         </div>
         <audio ref={audioRef} />

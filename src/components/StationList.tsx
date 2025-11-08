@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Station {
   id: number;
@@ -34,6 +35,57 @@ interface StationListProps {
 }
 
 const StationList = ({ stations, currentStationId, isPlaying, onPlay }: StationListProps) => {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>My Stations</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {stations.map((station) => {
+              const isCurrentlyPlaying = currentStationId === station.id && isPlaying;
+              return (
+                <div key={station.id} className={cn("flex items-center justify-between p-3 rounded-lg", currentStationId === station.id && "bg-accent")}>
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: station.color || '#e2e8f0' }}>
+                      <Radio className="h-5 w-5 text-white" />
+                    </div>
+                    <span className="font-medium truncate">{station.name}</span>
+                  </div>
+                  <div className="flex items-center flex-shrink-0">
+                    <Button variant="ghost" size="icon" onClick={() => onPlay(station)}>
+                      {isCurrentlyPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical className="h-5 w-5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          <span>Edit</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600">
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          <span>Delete</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
