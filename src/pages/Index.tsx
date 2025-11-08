@@ -2,9 +2,11 @@ import React, { useState, useMemo, useEffect } from 'react';
 import Header from '@/components/Header';
 import Player from '@/components/Player';
 import StationList from '@/components/StationList';
+import AddStationDialog from '@/components/AddStationDialog';
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { supabase } from '@/integrations/supabase/client';
-import { showError } from '@/utils/toast';
+import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
+import type { Session } from '@supabase/supabase-js';
 
 interface Station {
   id: number;
@@ -18,22 +20,39 @@ const Index = () => {
   const [stations, setStations] = useState<Station[]>([]);
   const [currentStation, setCurrentStation] = useState<Station | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
-    const fetchStations = async () => {
-      const { data, error } = await supabase
-        .from('stations')
-        .select('*')
-        .order('created_at', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching stations:', error);
-        showError('Could not fetch radio stations.');
-      } else if (data) {
-        setStations(data);
-      }
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
     };
+    getSession();
 
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  const fetchStations = async () => {
+    const { data, error } = await supabase
+      .from('stations')
+      .select('*')
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching stations:', error);
+      showError('Could not fetch radio stations.');
+    } else if (data) {
+      setStations(data);
+    }
+  };
+
+  useEffect(() => {
     fetchStations();
   }, []);
 
@@ -71,9 +90,41 @@ const Index = () => {
     setIsPlaying(true);
   };
 
+  const handleAddStation = async (station: Omit<Station, 'id'>) => {
+    const toastId = showLoading('Adding station...');
+    const { error } = await supabase.from('stations').insert([station]);
+    dismissToast(toastId);
+
+    if (error) {
+      showError(`Failed to add station: ${error.message}`);
+    } else {
+      showSuccess('Station added successfully!');
+      fetchStations(); // Refresh the list
+    }
+  };
+
+  const handleDeleteStation = async (stationId: number) => {
+    const toastId = showLoading('Deleting station...');
+    const { error } = await supabase.from('stations').delete().match({ id: stationId });
+    dismissToast(toastId);
+
+    if (error) {
+      showError(`Failed to delete station: ${error.message}`);
+    } else {
+      showSuccess('Station deleted successfully!');
+      if (currentStation?.id === stationId) {
+        setCurrentStation(null);
+        setIsPlaying(false);
+      }
+      fetchStations(); // Refresh the list
+    }
+  };
+
+  const isAdmin = !!session;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Header />
+      <Header session={session} />
       <main className="container mx-auto p-4 md:p-8 space-y-8">
         <Player 
           station={currentStation}
@@ -84,13 +135,18 @@ const Index = () => {
         />
         
         <div>
+          {isAdmin && (
+            <div className="mb-6 flex justify-center">
+              <AddStationDialog onAddStation={handleAddStation} />
+            </div>
+          )}
           <StationList 
             stations={stations} 
             currentStationId={currentStation?.id || null}
             isPlaying={isPlaying}
             onPlay={handlePlayStation}
-            isAdmin={false}
-            onDelete={() => {}}
+            isAdmin={isAdmin}
+            onDelete={handleDeleteStation}
           />
         </div>
       </main>
