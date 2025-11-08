@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, MoreVertical, Pencil, Trash2, Radio } from 'lucide-react';
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import EditStationDialog from './EditStationDialog';
 
 interface Station {
   id: number;
@@ -34,10 +35,18 @@ interface StationListProps {
   onPlay: (station: Station) => void;
   isAdmin: boolean;
   onDelete: (id: number) => void;
+  onUpdate: (station: Station) => void;
 }
 
-const StationList = ({ stations, currentStationId, isPlaying, onPlay, isAdmin, onDelete }: StationListProps) => {
+const StationList = ({ stations, currentStationId, isPlaying, onPlay, isAdmin, onDelete, onUpdate }: StationListProps) => {
   const isMobile = useIsMobile();
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [stationToEdit, setStationToEdit] = useState<Station | null>(null);
+
+  const handleEditClick = (station: Station) => {
+    setStationToEdit(station);
+    setIsEditDialogOpen(true);
+  };
 
   const renderActions = (station: Station) => {
     if (!isAdmin) return null;
@@ -49,7 +58,7 @@ const StationList = ({ stations, currentStationId, isPlaying, onPlay, isAdmin, o
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleEditClick(station)}>
             <Pencil className="mr-2 h-4 w-4" />
             <span>Edit</span>
           </DropdownMenuItem>
@@ -124,14 +133,22 @@ const StationList = ({ stations, currentStationId, isPlaying, onPlay, isAdmin, o
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>My Stations</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isMobile ? renderMobileList() : renderDesktopTable()}
-      </CardContent>
-    </Card>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>My Stations</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isMobile ? renderMobileList() : renderDesktopTable()}
+        </CardContent>
+      </Card>
+      <EditStationDialog
+        station={stationToEdit}
+        isOpen={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        onUpdateStation={onUpdate}
+      />
+    </>
   );
 };
 

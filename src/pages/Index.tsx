@@ -103,6 +103,22 @@ const Index = () => {
     }
   };
 
+  const handleUpdateStation = async (station: Station) => {
+    const toastId = showLoading('Updating station...');
+    const { error } = await supabase
+      .from('stations')
+      .update({ name: station.name, url: station.url, color: station.color })
+      .match({ id: station.id });
+    dismissToast(toastId);
+
+    if (error) {
+      showError(`Failed to update station: ${error.message}`);
+    } else {
+      showSuccess('Station updated successfully!');
+      fetchStations(); // Refresh the list
+    }
+  };
+
   const handleDeleteStation = async (stationId: number) => {
     const toastId = showLoading('Deleting station...');
     const { error } = await supabase.from('stations').delete().match({ id: stationId });
@@ -148,6 +164,7 @@ const Index = () => {
               onPlay={handlePlayStation}
               isAdmin={isAdmin}
               onDelete={handleDeleteStation}
+              onUpdate={handleUpdateStation}
             />
           )}
         </div>
