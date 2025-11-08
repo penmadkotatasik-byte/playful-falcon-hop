@@ -15,6 +15,7 @@ interface Station {
   id: number;
   name: string;
   url: string;
+  city?: string;
   color?: string;
 }
 
@@ -28,19 +29,21 @@ interface EditStationDialogProps {
 const EditStationDialog = ({ station, isOpen, onOpenChange, onUpdateStation }: EditStationDialogProps) => {
   const [name, setName] = useState('');
   const [url, setUrl] = useState('');
+  const [city, setCity] = useState('');
   const [color, setColor] = useState('#e2e8f0');
 
   useEffect(() => {
     if (station) {
       setName(station.name);
       setUrl(station.url);
+      setCity(station.city || '');
       setColor(station.color || '#e2e8f0');
     }
   }, [station]);
 
   const handleSubmit = () => {
     if (name && url && station) {
-      onUpdateStation({ ...station, name, url, color });
+      onUpdateStation({ ...station, name, url, city, color });
       onOpenChange(false);
     }
   };
@@ -68,6 +71,12 @@ const EditStationDialog = ({ station, isOpen, onOpenChange, onUpdateStation }: E
               Stream URL
             </Label>
             <Input id="url" value={url} onChange={(e) => setUrl(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="city">
+              Kota
+            </Label>
+            <Input id="city" value={city} onChange={(e) => setCity(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="color">

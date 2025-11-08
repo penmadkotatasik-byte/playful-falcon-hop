@@ -16,6 +16,7 @@ import { PlusCircle } from 'lucide-react';
 interface Station {
   name: string;
   url: string;
+  city?: string;
   icon?: string;
   color?: string;
 }
@@ -27,14 +28,16 @@ interface AddStationDialogProps {
 const AddStationDialog = ({ onAddStation }: AddStationDialogProps) => {
   const [name, setName] = useState('');
   const [url, setUrl] = useState('');
+  const [city, setCity] = useState('');
   const [color, setColor] = useState('#e2e8f0');
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSubmit = () => {
     if (name && url) {
-      onAddStation({ name, url, color });
+      onAddStation({ name, url, city, color });
       setName('');
       setUrl('');
+      setCity('');
       setColor('#e2e8f0');
       setIsOpen(false);
     }
@@ -66,6 +69,12 @@ const AddStationDialog = ({ onAddStation }: AddStationDialogProps) => {
               Stream URL
             </Label>
             <Input id="url" value={url} onChange={(e) => setUrl(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="city">
+              Kota
+            </Label>
+            <Input id="city" value={city} onChange={(e) => setCity(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="color">

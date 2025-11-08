@@ -14,6 +14,7 @@ interface Station {
   id: number;
   name: string;
   url: string;
+  city?: string;
   icon?: string;
   color?: string;
   created_at: string;
@@ -158,7 +159,7 @@ const Index = () => {
     const toastId = showLoading('Updating station...');
     const { error } = await supabase
       .from('stations')
-      .update({ name: station.name, url: station.url, color: station.color })
+      .update({ name: station.name, url: station.url, color: station.color, city: station.city })
       .match({ id: station.id });
     dismissToast(toastId);
 

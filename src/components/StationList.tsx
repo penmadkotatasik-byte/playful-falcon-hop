@@ -42,6 +42,7 @@ interface Station {
   id: number;
   name: string;
   url: string;
+  city?: string;
   icon?: string;
   color?: string;
 }
@@ -94,7 +95,10 @@ const SortableStationItem = ({ station, isMobile, isCurrentlyPlaying, isAdmin, o
           <div className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: station.color || '#e2e8f0' }}>
             <Radio className="h-5 w-5 text-white" />
           </div>
-          <span className="font-medium truncate">{station.name}</span>
+          <div className="truncate">
+            <span className="font-medium truncate">{station.name}</span>
+            {station.city && <p className="text-xs text-muted-foreground truncate">{station.city}</p>}
+          </div>
         </div>
         <div className="flex items-center flex-shrink-0">
           <Button variant="ghost" size="icon" onClick={() => onPlay(station)}>
@@ -123,7 +127,10 @@ const SortableStationItem = ({ station, isMobile, isCurrentlyPlaying, isAdmin, o
           <div className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: station.color || '#e2e8f0' }}>
             <Radio className="h-5 w-5 text-white" />
           </div>
-          <span className="font-medium">{station.name}</span>
+          <div>
+            <span className="font-medium">{station.name}</span>
+            {station.city && <p className="text-sm text-muted-foreground">{station.city}</p>}
+          </div>
         </div>
       </TableCell>
       <TableCell className="text-right">
@@ -221,7 +228,7 @@ const StationList = ({ stations, currentStationId, isPlaying, onPlay, isAdmin, o
                       <TableRow>
                         {isAdmin && <TableHead className="w-[40px]"></TableHead>}
                         <TableHead className="w-[80px]">Play</TableHead>
-                        <TableHead>Station Name</TableHead>
+                        <TableHead>Station</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
