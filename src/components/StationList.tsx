@@ -193,7 +193,7 @@ const StationList = ({ stations, currentStationId, isPlaying, onPlay, isAdmin, o
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>My Stations</CardTitle>
+          <CardTitle>My Stations ({stations.length})</CardTitle>
           {isAdmin && (
             <Button variant="ghost" size="icon" onClick={onSortToggle} aria-label="Sort stations">
               {sortOrder === 'asc' ? <ArrowUp className="h-5 w-5 text-muted-foreground" /> : <ArrowDown className="h-5 w-5 text-muted-foreground" />}
