@@ -3,7 +3,7 @@ import Header from '@/components/Header';
 import Player from '@/components/Player';
 import StationList from '@/components/StationList';
 import AddStationDialog from '@/components/AddStationDialog';
-import { MadeWithDyad } from "@/components/made-with-dyad";
+import { Footer } from "@/components/Footer";
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import type { Session } from '@supabase/supabase-js';
@@ -169,7 +169,7 @@ const Index = () => {
           )}
         </div>
       </main>
-      <MadeWithDyad />
+      <Footer />
     </div>
   );
 };
