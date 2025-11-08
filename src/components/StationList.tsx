@@ -32,10 +32,35 @@ interface StationListProps {
   currentStationId: number | null;
   isPlaying: boolean;
   onPlay: (station: Station) => void;
+  isAdmin: boolean;
+  onDelete: (id: number) => void;
 }
 
-const StationList = ({ stations, currentStationId, isPlaying, onPlay }: StationListProps) => {
+const StationList = ({ stations, currentStationId, isPlaying, onPlay, isAdmin, onDelete }: StationListProps) => {
   const isMobile = useIsMobile();
+
+  const renderActions = (station: Station) => {
+    if (!isAdmin) return null;
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon">
+            <MoreVertical className="h-5 w-5" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem>
+            <Pencil className="mr-2 h-4 w-4" />
+            <span>Edit</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="text-red-600" onClick={() => onDelete(station.id)}>
+            <Trash2 className="mr-2 h-4 w-4" />
+            <span>Delete</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
 
   const renderMobileList = () => (
     <div className="space-y-2">
@@ -53,23 +78,7 @@ const StationList = ({ stations, currentStationId, isPlaying, onPlay }: StationL
               <Button variant="ghost" size="icon" onClick={() => onPlay(station)}>
                 {isCurrentlyPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
               </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <MoreVertical className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    <span>Edit</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="text-red-600">
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    <span>Delete</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {renderActions(station)}
             </div>
           </div>
         );
@@ -105,23 +114,7 @@ const StationList = ({ stations, currentStationId, isPlaying, onPlay }: StationL
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreVertical className="h-5 w-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem>
-                      <Pencil className="mr-2 h-4 w-4" />
-                      <span>Edit</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-600">
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      <span>Delete</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                {renderActions(station)}
               </TableCell>
             </TableRow>
           );

@@ -23,6 +23,7 @@ const Index = () => {
   const [stations, setStations] = useState(initialStations);
   const [currentStation, setCurrentStation] = useState<Station | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const currentStationIndex = useMemo(() => {
     if (!currentStation) return -1;
@@ -65,9 +66,29 @@ const Index = () => {
     ]);
   };
 
+  const handleDeleteStation = (stationId: number) => {
+    setStations(prevStations => prevStations.filter(s => s.id !== stationId));
+    if (currentStation?.id === stationId) {
+      setCurrentStation(null);
+      setIsPlaying(false);
+    }
+  };
+
+  const handleLogin = (user: string, pass: string) => {
+    if (user === 'ERDE' && pass === 'ERDE123') {
+      setIsLoggedIn(true);
+      return true;
+    }
+    return false;
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Header />
+      <Header isLoggedIn={isLoggedIn} onLogin={handleLogin} onLogout={handleLogout} />
       <main className="container mx-auto p-4 md:p-8 space-y-8">
         <Player 
           station={currentStation}
@@ -85,7 +106,9 @@ const Index = () => {
             stations={stations} 
             currentStationId={currentStation?.id || null}
             isPlaying={isPlaying}
-            onPlay={handlePlayStation} 
+            onPlay={handlePlayStation}
+            isAdmin={isLoggedIn}
+            onDelete={handleDeleteStation}
           />
         </div>
       </main>
