@@ -7,7 +7,7 @@ import { Footer } from "@/components/Footer";
 import { supabase } from '@/integrations/supabase/client';
 import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast';
 import type { Session } from '@supabase/supabase-js';
-import type { BackgroundSettings } from '@/components/SettingsSheet';
+import type { AppSettings } from '@/components/SettingsSheet';
 import RunningInfo from '@/components/RunningInfo';
 
 interface Station {
@@ -19,11 +19,14 @@ interface Station {
   created_at: string;
 }
 
-const defaultSettings: BackgroundSettings = {
-  type: 'color',
-  color1: '#f1f5f9', // slate-100
-  color2: '#cbd5e1', // slate-300
-  imageUrl: '',
+const defaultSettings: AppSettings = {
+  background: {
+    type: 'color',
+    color1: '#f1f5f9', // slate-100
+    color2: '#cbd5e1', // slate-300
+    imageUrl: '',
+  },
+  showRunningText: true,
 };
 
 const Index = () => {
@@ -31,29 +34,34 @@ const Index = () => {
   const [currentStation, setCurrentStation] = useState<Station | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
-  const [backgroundSettings, setBackgroundSettings] = useState<BackgroundSettings>(defaultSettings);
+  const [settings, setSettings] = useState<AppSettings>(defaultSettings);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Load settings from localStorage on initial render
   useEffect(() => {
     try {
-      const savedSettings = localStorage.getItem('backgroundSettings');
+      const savedSettings = localStorage.getItem('appSettings');
       if (savedSettings) {
-        setBackgroundSettings(JSON.parse(savedSettings));
+        // Merge saved settings with defaults to avoid errors if new settings are added
+        const parsedSettings = JSON.parse(savedSettings);
+        setSettings(prevSettings => ({ ...prevSettings, ...parsedSettings }));
       }
     } catch (error) {
-      console.error("Failed to parse background settings from localStorage", error);
+      console.error("Failed to parse settings from localStorage", error);
     }
   }, []);
 
   // Save settings to localStorage whenever they change
-  useEffect(() => {
+  const handleSettingsSave = (newSettings: AppSettings) => {
+    setSettings(newSettings);
     try {
-      localStorage.setItem('backgroundSettings', JSON.stringify(backgroundSettings));
+      localStorage.setItem('appSettings', JSON.stringify(newSettings));
+      showSuccess("Pengaturan berhasil disimpan!");
     } catch (error)      {
-      console.error("Failed to save background settings to localStorage", error);
+      console.error("Failed to save settings to localStorage", error);
+      showError("Gagal menyimpan pengaturan.");
     }
-  }, [backgroundSettings]);
+  };
 
   useEffect(() => {
     const getSession = async () => {
@@ -188,7 +196,7 @@ const Index = () => {
   };
 
   const getBackgroundStyle = (): React.CSSProperties => {
-    const { type, color1, color2, imageUrl } = backgroundSettings;
+    const { type, color1, color2, imageUrl } = settings.background;
     switch (type) {
       case 'color':
         return { backgroundColor: color1 };
@@ -212,8 +220,8 @@ const Index = () => {
     <div className="min-h-screen text-foreground transition-all duration-500" style={getBackgroundStyle()}>
       <Header 
         session={session} 
-        backgroundSettings={backgroundSettings}
-        onSettingsChange={setBackgroundSettings}
+        settings={settings}
+        onSettingsSave={handleSettingsSave}
       />
       <main className="container mx-auto p-4 md:p-8 space-y-8">
         <Player 
@@ -246,7 +254,7 @@ const Index = () => {
           )}
         </div>
       </main>
-      <RunningInfo />
+      {settings.showRunningText && <RunningInfo />}
       <Footer />
     </div>
   );

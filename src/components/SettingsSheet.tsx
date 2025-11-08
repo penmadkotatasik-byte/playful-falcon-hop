@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, 'useState', 'useEffect' from 'react';
 import {
   Sheet,
   SheetContent,
@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 import { Settings } from 'lucide-react';
 
 export interface BackgroundSettings {
@@ -21,18 +23,23 @@ export interface BackgroundSettings {
   imageUrl: string;
 }
 
+export interface AppSettings {
+  background: BackgroundSettings;
+  showRunningText: boolean;
+}
+
 interface SettingsSheetProps {
-  settings: BackgroundSettings;
-  onSave: (settings: BackgroundSettings) => void;
+  settings: AppSettings;
+  onSave: (settings: AppSettings) => void;
 }
 
 const SettingsSheet = ({ settings, onSave }: SettingsSheetProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [localSettings, setLocalSettings] = useState<BackgroundSettings>(settings);
+  const [localSettings, setLocalSettings] = useState<AppSettings>(settings);
 
   useEffect(() => {
     setLocalSettings(settings);
-  }, [settings]);
+  }, [settings, isOpen]);
 
   const handleSave = () => {
     onSave(localSettings);
@@ -48,82 +55,101 @@ const SettingsSheet = ({ settings, onSave }: SettingsSheetProps) => {
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Display Settings</SheetTitle>
+          <SheetTitle>Customize</SheetTitle>
           <SheetDescription>
-            Customize the appearance of the application background.
+            Ubah tampilan aplikasi sesuai keinginan Anda.
           </SheetDescription>
         </SheetHeader>
         <div className="grid gap-6 py-6">
-          <RadioGroup
-            value={localSettings.type}
-            onValueChange={(value: 'color' | 'gradient' | 'image') => setLocalSettings({ ...localSettings, type: value })}
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="color" id="r-color" />
-              <Label htmlFor="r-color">Solid Color</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="gradient" id="r-gradient" />
-              <Label htmlFor="r-gradient">Gradient</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="image" id="r-image" />
-              <Label htmlFor="r-image">Image URL</Label>
-            </div>
-          </RadioGroup>
+          <div>
+            <h3 className="text-lg font-medium mb-4">Latar Belakang</h3>
+            <RadioGroup
+              value={localSettings.background.type}
+              onValueChange={(value: 'color' | 'gradient' | 'image') => setLocalSettings({ ...localSettings, background: { ...localSettings.background, type: value } })}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="color" id="r-color" />
+                <Label htmlFor="r-color">Warna Solid</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="gradient" id="r-gradient" />
+                <Label htmlFor="r-gradient">Gradasi Warna</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="image" id="r-image" />
+                <Label htmlFor="r-image">Gambar (URL)</Label>
+              </div>
+            </RadioGroup>
 
-          {localSettings.type === 'color' && (
-            <div className="space-y-2">
-              <Label htmlFor="color1">Background Color</Label>
-              <Input
-                id="color1"
-                type="color"
-                value={localSettings.color1}
-                onChange={(e) => setLocalSettings({ ...localSettings, color1: e.target.value })}
-                className="h-10 w-full"
-              />
-            </div>
-          )}
-
-          {localSettings.type === 'gradient' && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="color1">Start Color</Label>
+            {localSettings.background.type === 'color' && (
+              <div className="space-y-2 mt-4">
+                <Label htmlFor="color1">Warna Latar</Label>
                 <Input
                   id="color1"
                   type="color"
-                  value={localSettings.color1}
-                  onChange={(e) => setLocalSettings({ ...localSettings, color1: e.target.value })}
+                  value={localSettings.background.color1}
+                  onChange={(e) => setLocalSettings({ ...localSettings, background: { ...localSettings.background, color1: e.target.value } })}
                   className="h-10 w-full"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="color2">End Color</Label>
-                <Input
-                  id="color2"
-                  type="color"
-                  value={localSettings.color2}
-                  onChange={(e) => setLocalSettings({ ...localSettings, color2: e.target.value })}
-                  className="h-10 w-full"
-                />
-              </div>
-            </div>
-          )}
+            )}
 
-          {localSettings.type === 'image' && (
-            <div className="space-y-2">
-              <Label htmlFor="imageUrl">Image URL</Label>
-              <Input
-                id="imageUrl"
-                placeholder="https://example.com/image.jpg"
-                value={localSettings.imageUrl}
-                onChange={(e) => setLocalSettings({ ...localSettings, imageUrl: e.target.value })}
+            {localSettings.background.type === 'gradient' && (
+              <div className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="color1">Warna Awal</Label>
+                  <Input
+                    id="color1"
+                    type="color"
+                    value={localSettings.background.color1}
+                    onChange={(e) => setLocalSettings({ ...localSettings, background: { ...localSettings.background, color1: e.target.value } })}
+                    className="h-10 w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="color2">Warna Akhir</Label>
+                  <Input
+                    id="color2"
+                    type="color"
+                    value={localSettings.background.color2}
+                    onChange={(e) => setLocalSettings({ ...localSettings, background: { ...localSettings.background, color2: e.target.value } })}
+                    className="h-10 w-full"
+                  />
+                </div>
+              </div>
+            )}
+
+            {localSettings.background.type === 'image' && (
+              <div className="space-y-2 mt-4">
+                <Label htmlFor="imageUrl">URL Gambar</Label>
+                <Input
+                  id="imageUrl"
+                  placeholder="https://example.com/image.jpg"
+                  value={localSettings.background.imageUrl}
+                  onChange={(e) => setLocalSettings({ ...localSettings, background: { ...localSettings.background, imageUrl: e.target.value } })}
+                />
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
+          <div>
+            <h3 className="text-lg font-medium mb-4">Running Text</h3>
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <Label htmlFor="running-text-toggle" className="font-medium">
+                Tampilkan Running Text
+              </Label>
+              <Switch
+                id="running-text-toggle"
+                checked={localSettings.showRunningText}
+                onCheckedChange={(checked) => setLocalSettings({ ...localSettings, showRunningText: checked })}
               />
             </div>
-          )}
+          </div>
         </div>
         <SheetFooter>
-          <Button onClick={handleSave}>Save Changes</Button>
+          <Button onClick={handleSave}>Simpan Perubahan</Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>

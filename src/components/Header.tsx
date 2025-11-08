@@ -4,15 +4,15 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
-import SettingsSheet, { BackgroundSettings } from './SettingsSheet';
+import SettingsSheet, { AppSettings } from './SettingsSheet';
 
 interface HeaderProps {
   session: Session | null;
-  backgroundSettings: BackgroundSettings;
-  onSettingsChange: (settings: BackgroundSettings) => void;
+  settings: AppSettings;
+  onSettingsSave: (settings: AppSettings) => void;
 }
 
-const Header = ({ session, backgroundSettings, onSettingsChange }: HeaderProps) => {
+const Header = ({ session, settings, onSettingsSave }: HeaderProps) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -30,7 +30,7 @@ const Header = ({ session, backgroundSettings, onSettingsChange }: HeaderProps) 
           </h1>
         </div>
         <div className="flex items-center gap-2">
-          {session && <SettingsSheet settings={backgroundSettings} onSave={onSettingsChange} />}
+          {session && <SettingsSheet settings={settings} onSave={onSettingsSave} />}
           {session ? (
             <Button onClick={handleLogout} variant="outline">Logout</Button>
           ) : (
