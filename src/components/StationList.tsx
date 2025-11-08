@@ -129,15 +129,7 @@ const StationList = ({ stations, currentStationId, isPlaying, onPlay, isAdmin, o
         <CardTitle>My Stations</CardTitle>
       </CardHeader>
       <CardContent>
-        {stations.length === 0 ? (
-          <div className="text-center text-muted-foreground py-8">
-            <p>Belum ada stasiun radio yang ditambahkan.</p>
-          </div>
-        ) : isMobile ? (
-          renderMobileList()
-        ) : (
-          renderDesktopTable()
-        )}
+        {isMobile ? renderMobileList() : renderDesktopTable()}
       </CardContent>
     </Card>
   );

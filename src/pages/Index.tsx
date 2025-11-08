@@ -140,14 +140,16 @@ const Index = () => {
               <AddStationDialog onAddStation={handleAddStation} />
             </div>
           )}
-          <StationList 
-            stations={stations} 
-            currentStationId={currentStation?.id || null}
-            isPlaying={isPlaying}
-            onPlay={handlePlayStation}
-            isAdmin={isAdmin}
-            onDelete={handleDeleteStation}
-          />
+          {stations.length > 0 && (
+            <StationList 
+              stations={stations} 
+              currentStationId={currentStation?.id || null}
+              isPlaying={isPlaying}
+              onPlay={handlePlayStation}
+              isAdmin={isAdmin}
+              onDelete={handleDeleteStation}
+            />
+          )}
         </div>
       </main>
       <MadeWithDyad />
