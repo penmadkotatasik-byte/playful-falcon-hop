@@ -78,7 +78,7 @@ const Index = () => {
         />
         
         <div>
-          <div className="mb-6 flex justify-end">
+          <div className="mb-6 flex justify-center">
             <AddStationDialog onAddStation={handleAddStation} />
           </div>
           <StationList 
