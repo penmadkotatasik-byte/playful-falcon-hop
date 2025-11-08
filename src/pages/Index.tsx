@@ -99,9 +99,11 @@ const Index = () => {
         />
         
         <div>
-          <div className="mb-6 flex justify-center">
-            <AddStationDialog onAddStation={handleAddStation} />
-          </div>
+          {isLoggedIn && (
+            <div className="mb-6 flex justify-center">
+              <AddStationDialog onAddStation={handleAddStation} />
+            </div>
+          )}
           <StationList 
             stations={stations} 
             currentStationId={currentStation?.id || null}
