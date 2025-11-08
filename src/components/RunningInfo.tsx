@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Calendar } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-const RunningInfo = () => {
+interface RunningInfoProps {
+  speed: number;
+  fontFamily: 'sans' | 'serif' | 'mono';
+}
+
+const RunningInfo = ({ speed, fontFamily }: RunningInfoProps) => {
   const [dateTime, setDateTime] = useState(new Date());
 
   useEffect(() => {
@@ -22,6 +28,12 @@ const RunningInfo = () => {
     second: '2-digit',
   });
 
+  const fontClasses = {
+    sans: 'font-sans',
+    serif: 'font-serif',
+    mono: 'font-mono',
+  };
+
   const renderContent = () => {
     return (
       <>
@@ -39,8 +51,11 @@ const RunningInfo = () => {
   };
 
   return (
-    <div className="bg-card border-t border-b overflow-hidden whitespace-nowrap relative">
-      <div className="flex items-center py-2 animate-marquee">
+    <div className={cn("bg-card border-t border-b overflow-hidden whitespace-nowrap relative", fontClasses[fontFamily])}>
+      <div 
+        className="flex items-center py-2 animate-marquee"
+        style={{ animationDuration: `${speed}s` }}
+      >
         <div className="flex items-center flex-shrink-0 px-4">
           {renderContent()}
         </div>

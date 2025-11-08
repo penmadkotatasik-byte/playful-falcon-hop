@@ -15,6 +15,14 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Settings } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export interface BackgroundSettings {
   type: 'color' | 'gradient' | 'image';
@@ -23,9 +31,15 @@ export interface BackgroundSettings {
   imageUrl: string;
 }
 
+export interface RunningTextSettings {
+  show: boolean;
+  speed: number;
+  fontFamily: 'sans' | 'serif' | 'mono';
+}
+
 export interface AppSettings {
   background: BackgroundSettings;
-  showRunningText: boolean;
+  runningText: RunningTextSettings;
 }
 
 interface SettingsSheetProps {
@@ -53,7 +67,7 @@ const SettingsSheet = ({ settings, onSave }: SettingsSheetProps) => {
           <Settings className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Customize</SheetTitle>
           <SheetDescription>
@@ -136,15 +150,49 @@ const SettingsSheet = ({ settings, onSave }: SettingsSheetProps) => {
 
           <div>
             <h3 className="text-lg font-medium mb-4">Running Text</h3>
-            <div className="flex items-center justify-between rounded-lg border p-3">
-              <Label htmlFor="running-text-toggle" className="font-medium">
-                Tampilkan Running Text
-              </Label>
-              <Switch
-                id="running-text-toggle"
-                checked={localSettings.showRunningText}
-                onCheckedChange={(checked) => setLocalSettings({ ...localSettings, showRunningText: checked })}
-              />
+            <div className="space-y-6">
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <Label htmlFor="running-text-toggle" className="font-medium">
+                  Tampilkan Running Text
+                </Label>
+                <Switch
+                  id="running-text-toggle"
+                  checked={localSettings.runningText.show}
+                  onCheckedChange={(checked) => setLocalSettings({ ...localSettings, runningText: { ...localSettings.runningText, show: checked } })}
+                />
+              </div>
+
+              <div className="space-y-3">
+                <Label htmlFor="speed-slider">Kecepatan (lebih rendah lebih cepat)</Label>
+                <div className="flex items-center gap-4">
+                  <Slider
+                    id="speed-slider"
+                    min={10}
+                    max={60}
+                    step={1}
+                    value={[localSettings.runningText.speed]}
+                    onValueChange={(value) => setLocalSettings({ ...localSettings, runningText: { ...localSettings.runningText, speed: value[0] } })}
+                  />
+                  <span className="text-sm font-medium w-12 text-center">{localSettings.runningText.speed}s</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="font-family-select">Jenis Font</Label>
+                <Select
+                  value={localSettings.runningText.fontFamily}
+                  onValueChange={(value: 'sans' | 'serif' | 'mono') => setLocalSettings({ ...localSettings, runningText: { ...localSettings.runningText, fontFamily: value } })}
+                >
+                  <SelectTrigger id="font-family-select">
+                    <SelectValue placeholder="Pilih font" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sans">Sans-serif</SelectItem>
+                    <SelectItem value="serif">Serif</SelectItem>
+                    <SelectItem value="mono">Monospace</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </div>

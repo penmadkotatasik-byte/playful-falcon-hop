@@ -22,11 +22,15 @@ interface Station {
 const defaultSettings: AppSettings = {
   background: {
     type: 'color',
-    color1: '#f1f5f9', // slate-100
-    color2: '#cbd5e1', // slate-300
+    color1: '#f1f5f9',
+    color2: '#cbd5e1',
     imageUrl: '',
   },
-  showRunningText: true,
+  runningText: {
+    show: true,
+    speed: 30,
+    fontFamily: 'sans',
+  },
 };
 
 const Index = () => {
@@ -42,9 +46,14 @@ const Index = () => {
     try {
       const savedSettings = localStorage.getItem('appSettings');
       if (savedSettings) {
-        // Merge saved settings with defaults to avoid errors if new settings are added
         const parsedSettings = JSON.parse(savedSettings);
-        setSettings(prevSettings => ({ ...prevSettings, ...parsedSettings }));
+        // Deep merge to handle nested settings objects gracefully
+        setSettings(prevSettings => ({
+          ...prevSettings,
+          ...parsedSettings,
+          background: { ...prevSettings.background, ...parsedSettings.background },
+          runningText: { ...prevSettings.runningText, ...parsedSettings.runningText },
+        }));
       }
     } catch (error) {
       console.error("Failed to parse settings from localStorage", error);
@@ -254,7 +263,7 @@ const Index = () => {
           )}
         </div>
       </main>
-      {settings.showRunningText && <RunningInfo />}
+      {settings.runningText.show && <RunningInfo speed={settings.runningText.speed} fontFamily={settings.runningText.fontFamily} />}
       <Footer />
     </div>
   );
