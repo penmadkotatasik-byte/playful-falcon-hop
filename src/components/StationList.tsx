@@ -1,13 +1,22 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { Play, Pause, MoreVertical, Pencil, Trash2, Radio } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from '@/lib/utils';
 
 interface Station {
   id: number;
@@ -19,50 +28,68 @@ interface Station {
 
 interface StationListProps {
   stations: Station[];
+  currentStationId: number | null;
+  isPlaying: boolean;
   onPlay: (station: Station) => void;
 }
 
-const StationList = ({ stations, onPlay }: StationListProps) => {
+const StationList = ({ stations, currentStationId, isPlaying, onPlay }: StationListProps) => {
   return (
     <Card>
       <CardHeader>
         <CardTitle>My Stations</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
-          {stations.map((station) => (
-            <div key={station.id} className="flex items-center justify-between p-2 rounded-md hover:bg-accent">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-md flex items-center justify-center" style={{ backgroundColor: station.color || '#e2e8f0' }}>
-                  {/* We can add an icon here later */}
-                </div>
-                <span>{station.name}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" onClick={() => onPlay(station)}>
-                  <Play className="h-5 w-5" />
-                </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreVertical className="h-5 w-5" />
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[80px]">Play</TableHead>
+              <TableHead>Station Name</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {stations.map((station) => {
+              const isCurrentlyPlaying = currentStationId === station.id && isPlaying;
+              return (
+                <TableRow key={station.id} className={cn(currentStationId === station.id && "bg-accent")}>
+                  <TableCell>
+                    <Button variant="ghost" size="icon" onClick={() => onPlay(station)}>
+                      {isCurrentlyPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem>
-                      <Pencil className="mr-2 h-4 w-4" />
-                      <span>Edit</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-600">
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      <span>Delete</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-          ))}
-        </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: station.color || '#e2e8f0' }}>
+                        <Radio className="h-5 w-5 text-white" />
+                      </div>
+                      <span className="font-medium">{station.name}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical className="h-5 w-5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          <span>Edit</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600">
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          <span>Delete</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
   );
