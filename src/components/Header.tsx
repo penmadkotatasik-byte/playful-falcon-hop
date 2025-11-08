@@ -42,7 +42,7 @@ const Header = ({ session, settings, onSettingsSave }: HeaderProps) => {
 
   return (
     <header className="bg-card border-b p-4 sticky top-0 z-10">
-      <div className="mx-auto flex items-center justify-between gap-4">
+      <div className="relative mx-auto flex items-center justify-center">
         <div
           className="flex items-center gap-3 sm:gap-4 cursor-pointer"
           onClick={handleLogoClick}
@@ -52,7 +52,7 @@ const Header = ({ session, settings, onSettingsSave }: HeaderProps) => {
             <span className="hidden sm:inline">STREAMING </span>RADIO ERDE
           </h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="absolute right-0 flex items-center gap-2">
           {session && <SettingsSheet settings={settings} onSave={onSettingsSave} />}
           {session ? (
             <Button onClick={handleLogout} variant="outline">Logout</Button>
