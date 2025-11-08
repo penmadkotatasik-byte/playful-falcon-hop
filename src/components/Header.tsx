@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { Radio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,16 +14,39 @@ interface HeaderProps {
 
 const Header = ({ session, settings, onSettingsSave }: HeaderProps) => {
   const navigate = useNavigate();
+  const [clickCount, setClickCount] = useState(0);
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/');
   };
 
+  const handleLogoClick = () => {
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
+    }
+
+    const newClickCount = clickCount + 1;
+    setClickCount(newClickCount);
+
+    if (newClickCount >= 5) {
+      navigate('/login');
+      setClickCount(0);
+    } else {
+      clickTimeoutRef.current = setTimeout(() => {
+        setClickCount(0);
+      }, 1500); // Reset counter after 1.5 seconds of inactivity
+    }
+  };
+
   return (
     <header className="bg-card border-b p-4 sticky top-0 z-10">
       <div className="mx-auto flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 sm:gap-4">
+        <div
+          className="flex items-center gap-3 sm:gap-4 cursor-pointer"
+          onClick={handleLogoClick}
+        >
           <Radio className="h-8 w-8 text-primary" />
           <h1 className="text-lg sm:text-2xl font-bold truncate">
             <span className="hidden sm:inline">STREAMING </span>RADIO ERDE
@@ -33,9 +56,7 @@ const Header = ({ session, settings, onSettingsSave }: HeaderProps) => {
           {session && <SettingsSheet settings={settings} onSave={onSettingsSave} />}
           {session ? (
             <Button onClick={handleLogout} variant="outline">Logout</Button>
-          ) : (
-            <Button onClick={() => navigate('/login')}>Admin Login</Button>
-          )}
+          ) : null}
         </div>
       </div>
     </header>
