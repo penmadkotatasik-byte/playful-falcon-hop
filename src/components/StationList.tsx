@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, MoreVertical, Pencil, Trash2, Radio } from 'lucide-react';
+import { Play, Pause, MoreVertical, Pencil, Trash2, Radio, GripVertical } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +20,23 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import EditStationDialog from './EditStationDialog';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface Station {
   id: number;
@@ -37,12 +54,103 @@ interface StationListProps {
   isAdmin: boolean;
   onDelete: (id: number) => void;
   onUpdate: (station: Station) => void;
+  onReorder: (stations: Station[]) => void;
 }
 
-const StationList = ({ stations, currentStationId, isPlaying, onPlay, isAdmin, onDelete, onUpdate }: StationListProps) => {
+interface SortableStationProps {
+  station: Station;
+  isMobile: boolean;
+  isCurrentlyPlaying: boolean;
+  isAdmin: boolean;
+  onPlay: (station: Station) => void;
+  renderActions: (station: Station) => React.ReactNode;
+}
+
+const SortableStationItem = ({ station, isMobile, isCurrentlyPlaying, isAdmin, onPlay, renderActions }: SortableStationProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: station.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  if (isMobile) {
+    return (
+      <div ref={setNodeRef} style={style} className={cn("flex items-center justify-between p-3 rounded-lg", isCurrentlyPlaying && "bg-accent")}>
+        <div className="flex items-center gap-2 overflow-hidden">
+          {isAdmin && (
+            <div {...attributes} {...listeners} className="cursor-grab touch-none p-1">
+              <GripVertical className="h-5 w-5 text-muted-foreground" />
+            </div>
+          )}
+          <div className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: station.color || '#e2e8f0' }}>
+            <Radio className="h-5 w-5 text-white" />
+          </div>
+          <span className="font-medium truncate">{station.name}</span>
+        </div>
+        <div className="flex items-center flex-shrink-0">
+          <Button variant="ghost" size="icon" onClick={() => onPlay(station)}>
+            {isCurrentlyPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+          </Button>
+          {renderActions(station)}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <TableRow ref={setNodeRef} style={style} {...attributes} className={cn(isCurrentlyPlaying && "bg-accent")}>
+      {isAdmin && (
+        <TableCell {...listeners} className="cursor-grab touch-none w-[40px]">
+          <GripVertical className="h-5 w-5 text-muted-foreground" />
+        </TableCell>
+      )}
+      <TableCell className="w-[80px]">
+        <Button variant="ghost" size="icon" onClick={() => onPlay(station)}>
+          {isCurrentlyPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+        </Button>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: station.color || '#e2e8f0' }}>
+            <Radio className="h-5 w-5 text-white" />
+          </div>
+          <span className="font-medium">{station.name}</span>
+        </div>
+      </TableCell>
+      <TableCell className="text-right">
+        {renderActions(station)}
+      </TableCell>
+    </TableRow>
+  );
+};
+
+const StationList = ({ stations, currentStationId, isPlaying, onPlay, isAdmin, onDelete, onUpdate, onReorder }: StationListProps) => {
   const isMobile = useIsMobile();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [stationToEdit, setStationToEdit] = useState<Station | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = stations.findIndex((s) => s.id === active.id);
+      const newIndex = stations.findIndex((s) => s.id === over.id);
+      onReorder(arrayMove(stations, oldIndex, newIndex));
+    }
+  };
 
   const handleEditClick = (station: Station) => {
     setStationToEdit(station);
@@ -72,67 +180,6 @@ const StationList = ({ stations, currentStationId, isPlaying, onPlay, isAdmin, o
     );
   };
 
-  const renderMobileList = () => (
-    <div className="space-y-2">
-      {stations.map((station) => {
-        const isCurrentlyPlaying = currentStationId === station.id && isPlaying;
-        return (
-          <div key={station.id} className={cn("flex items-center justify-between p-3 rounded-lg", currentStationId === station.id && "bg-accent")}>
-            <div className="flex items-center gap-3 overflow-hidden">
-              <div className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: station.color || '#e2e8f0' }}>
-                <Radio className="h-5 w-5 text-white" />
-              </div>
-              <span className="font-medium truncate">{station.name}</span>
-            </div>
-            <div className="flex items-center flex-shrink-0">
-              <Button variant="ghost" size="icon" onClick={() => onPlay(station)}>
-                {isCurrentlyPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-              </Button>
-              {renderActions(station)}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-
-  const renderDesktopTable = () => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[80px]">Play</TableHead>
-          <TableHead>Station Name</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {stations.map((station) => {
-          const isCurrentlyPlaying = currentStationId === station.id && isPlaying;
-          return (
-            <TableRow key={station.id} className={cn(currentStationId === station.id && "bg-accent")}>
-              <TableCell>
-                <Button variant="ghost" size="icon" onClick={() => onPlay(station)}>
-                  {isCurrentlyPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-                </Button>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: station.color || '#e2e8f0' }}>
-                    <Radio className="h-5 w-5 text-white" />
-                  </div>
-                  <span className="font-medium">{station.name}</span>
-                </div>
-              </TableCell>
-              <TableCell className="text-right">
-                {renderActions(station)}
-              </TableCell>
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
-  );
-
   return (
     <>
       <Card>
@@ -141,7 +188,53 @@ const StationList = ({ stations, currentStationId, isPlaying, onPlay, isAdmin, o
         </CardHeader>
         <CardContent>
           <ScrollArea className="h-[450px] pr-4">
-            {isMobile ? renderMobileList() : renderDesktopTable()}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext items={stations.map(s => s.id)} strategy={verticalListSortingStrategy}>
+                {isMobile ? (
+                  <div className="space-y-2">
+                    {stations.map((station) => (
+                      <SortableStationItem
+                        key={station.id}
+                        station={station}
+                        isMobile={isMobile}
+                        isCurrentlyPlaying={currentStationId === station.id && isPlaying}
+                        isAdmin={isAdmin}
+                        onPlay={onPlay}
+                        renderActions={renderActions}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        {isAdmin && <TableHead className="w-[40px]"></TableHead>}
+                        <TableHead className="w-[80px]">Play</TableHead>
+                        <TableHead>Station Name</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {stations.map((station) => (
+                        <SortableStationItem
+                          key={station.id}
+                          station={station}
+                          isMobile={isMobile}
+                          isCurrentlyPlaying={currentStationId === station.id && isPlaying}
+                          isAdmin={isAdmin}
+                          onPlay={onPlay}
+                          renderActions={renderActions}
+                        />
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </SortableContext>
+            </DndContext>
           </ScrollArea>
         </CardContent>
       </Card>

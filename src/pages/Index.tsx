@@ -166,6 +166,12 @@ const Index = () => {
     }
   };
 
+  const handleReorderStations = (reorderedStations: Station[]) => {
+    setStations(reorderedStations);
+    // Note: This only reorders on the client side for the current session.
+    // The order is not saved to the database yet.
+  };
+
   const getBackgroundStyle = (): React.CSSProperties => {
     const { type, color1, color2, imageUrl } = backgroundSettings;
     switch (type) {
@@ -218,6 +224,7 @@ const Index = () => {
               isAdmin={isAdmin}
               onDelete={handleDeleteStation}
               onUpdate={handleUpdateStation}
+              onReorder={handleReorderStations}
             />
           )}
         </div>
