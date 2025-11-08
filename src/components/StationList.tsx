@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, MoreVertical, Pencil, Trash2, Radio, GripVertical } from 'lucide-react';
+import { Play, Pause, MoreVertical, Pencil, Trash2, Radio, GripVertical, ArrowUp, ArrowDown } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,6 +55,8 @@ interface StationListProps {
   onDelete: (id: number) => void;
   onUpdate: (station: Station) => void;
   onReorder: (stations: Station[]) => void;
+  sortOrder: 'asc' | 'desc';
+  onSortToggle: () => void;
 }
 
 interface SortableStationProps {
@@ -131,7 +133,7 @@ const SortableStationItem = ({ station, isMobile, isCurrentlyPlaying, isAdmin, o
   );
 };
 
-const StationList = ({ stations, currentStationId, isPlaying, onPlay, isAdmin, onDelete, onUpdate, onReorder }: StationListProps) => {
+const StationList = ({ stations, currentStationId, isPlaying, onPlay, isAdmin, onDelete, onUpdate, onReorder, sortOrder, onSortToggle }: StationListProps) => {
   const isMobile = useIsMobile();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [stationToEdit, setStationToEdit] = useState<Station | null>(null);
@@ -183,8 +185,13 @@ const StationList = ({ stations, currentStationId, isPlaying, onPlay, isAdmin, o
   return (
     <>
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>My Stations</CardTitle>
+          {isAdmin && (
+            <Button variant="ghost" size="icon" onClick={onSortToggle} aria-label="Sort stations">
+              {sortOrder === 'asc' ? <ArrowUp className="h-5 w-5 text-muted-foreground" /> : <ArrowDown className="h-5 w-5 text-muted-foreground" />}
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           <ScrollArea className="h-[450px] pr-4">

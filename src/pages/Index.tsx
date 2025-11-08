@@ -15,6 +15,7 @@ interface Station {
   url: string;
   icon?: string;
   color?: string;
+  created_at: string;
 }
 
 const defaultSettings: BackgroundSettings = {
@@ -30,6 +31,7 @@ const Index = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [backgroundSettings, setBackgroundSettings] = useState<BackgroundSettings>(defaultSettings);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Load settings from localStorage on initial render
   useEffect(() => {
@@ -79,6 +81,7 @@ const Index = () => {
       showError('Could not fetch radio stations.');
     } else if (data) {
       setStations(data);
+      setSortOrder('asc');
     }
   };
 
@@ -120,7 +123,7 @@ const Index = () => {
     setIsPlaying(true);
   };
 
-  const handleAddStation = async (station: Omit<Station, 'id'>) => {
+  const handleAddStation = async (station: Omit<Station, 'id' | 'created_at'>) => {
     const toastId = showLoading('Adding station...');
     const { error } = await supabase.from('stations').insert([station]);
     dismissToast(toastId);
@@ -168,8 +171,21 @@ const Index = () => {
 
   const handleReorderStations = (reorderedStations: Station[]) => {
     setStations(reorderedStations);
-    // Note: This only reorders on the client side for the current session.
-    // The order is not saved to the database yet.
+  };
+
+  const handleSortToggle = () => {
+    const newOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    const sortedStations = [...stations].sort((a, b) => {
+      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      if (newOrder === 'asc') {
+        return dateA - dateB;
+      } else {
+        return dateB - dateA;
+      }
+    });
+    setStations(sortedStations);
+    setSortOrder(newOrder);
   };
 
   const getBackgroundStyle = (): React.CSSProperties => {
@@ -225,6 +241,8 @@ const Index = () => {
               onDelete={handleDeleteStation}
               onUpdate={handleUpdateStation}
               onReorder={handleReorderStations}
+              sortOrder={sortOrder}
+              onSortToggle={handleSortToggle}
             />
           )}
         </div>
