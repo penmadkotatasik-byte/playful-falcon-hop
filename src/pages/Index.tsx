@@ -74,7 +74,7 @@ const Index = () => {
     const { data, error } = await supabase
       .from('stations')
       .select('*')
-      .order('created_at', { ascending: true });
+      .order('name', { ascending: true });
 
     if (error) {
       console.error('Error fetching stations:', error);
@@ -176,12 +176,10 @@ const Index = () => {
   const handleSortToggle = () => {
     const newOrder = sortOrder === 'asc' ? 'desc' : 'asc';
     const sortedStations = [...stations].sort((a, b) => {
-      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
       if (newOrder === 'asc') {
-        return dateA - dateB;
+        return a.name.localeCompare(b.name);
       } else {
-        return dateB - dateA;
+        return b.name.localeCompare(a.name);
       }
     });
     setStations(sortedStations);
