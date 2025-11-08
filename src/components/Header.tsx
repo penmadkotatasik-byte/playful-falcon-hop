@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
 import SettingsSheet, { AppSettings } from './SettingsSheet';
+import VisitorCounter from './VisitorCounter';
 
 interface HeaderProps {
   session: Session | null;
@@ -42,9 +43,12 @@ const Header = ({ session, settings, onSettingsSave }: HeaderProps) => {
 
   return (
     <header className="bg-card border-b p-4 sticky top-0 z-10">
-      <div className="relative mx-auto flex items-center justify-center">
+      <div className="relative mx-auto flex items-center justify-between">
+        <div className="absolute left-0 flex items-center">
+          <VisitorCounter />
+        </div>
         <div
-          className="flex items-center gap-3 sm:gap-4 cursor-pointer"
+          className="flex items-center gap-3 sm:gap-4 cursor-pointer mx-auto"
           onClick={handleLogoClick}
         >
           <Radio className="h-8 w-8 text-primary" />
@@ -60,7 +64,3 @@ const Header = ({ session, settings, onSettingsSave }: HeaderProps) => {
         </div>
       </div>
     </header>
-  );
-};
-
-export default Header;
