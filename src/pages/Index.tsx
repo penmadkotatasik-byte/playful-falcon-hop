@@ -9,6 +9,7 @@ import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast
 import type { Session } from '@supabase/supabase-js';
 import type { AppSettings } from '@/components/SettingsSheet';
 import RunningInfo from '@/components/RunningInfo';
+import AdBanner from '@/components/AdBanner';
 
 interface Station {
   id: number;
@@ -247,6 +248,8 @@ const Index = () => {
           onNext={handleNext}
           onPrevious={handlePrevious}
         />
+
+        <AdBanner />
         
         <div>
           {isAdmin && (
