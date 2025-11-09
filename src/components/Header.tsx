@@ -58,7 +58,7 @@ const Header = ({ session, settings, onSettingsSave, onlineCount }: HeaderProps)
           </h1>
         </div>
         <div className="absolute right-0 flex items-center gap-2">
-          {session && <SettingsSheet settings={settings} onSave={onSettingsSave} />}
+          <SettingsSheet settings={settings} onSave={onSettingsSave} isAdmin={!!session} />
           {session ? (
             <Button onClick={handleLogout} variant="outline">Logout</Button>
           ) : null}

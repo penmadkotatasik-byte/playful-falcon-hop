@@ -45,9 +45,10 @@ export interface AppSettings {
 interface SettingsSheetProps {
   settings: AppSettings;
   onSave: (settings: AppSettings) => void;
+  isAdmin: boolean;
 }
 
-const SettingsSheet = ({ settings, onSave }: SettingsSheetProps) => {
+const SettingsSheet = ({ settings, onSave, isAdmin }: SettingsSheetProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [localSettings, setLocalSettings] = useState<AppSettings>(settings);
 
@@ -146,55 +147,58 @@ const SettingsSheet = ({ settings, onSave }: SettingsSheetProps) => {
             )}
           </div>
 
-          <Separator />
+          {isAdmin && (
+            <>
+              <Separator />
+              <div>
+                <h3 className="text-lg font-medium mb-4">Running Text</h3>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between rounded-lg border p-3">
+                    <Label htmlFor="running-text-toggle" className="font-medium">
+                      Tampilkan Running Text
+                    </Label>
+                    <Switch
+                      id="running-text-toggle"
+                      checked={localSettings.runningText.show}
+                      onCheckedChange={(checked) => setLocalSettings({ ...localSettings, runningText: { ...localSettings.runningText, show: checked } })}
+                    />
+                  </div>
 
-          <div>
-            <h3 className="text-lg font-medium mb-4">Running Text</h3>
-            <div className="space-y-6">
-              <div className="flex items-center justify-between rounded-lg border p-3">
-                <Label htmlFor="running-text-toggle" className="font-medium">
-                  Tampilkan Running Text
-                </Label>
-                <Switch
-                  id="running-text-toggle"
-                  checked={localSettings.runningText.show}
-                  onCheckedChange={(checked) => setLocalSettings({ ...localSettings, runningText: { ...localSettings.runningText, show: checked } })}
-                />
-              </div>
+                  <div className="space-y-3">
+                    <Label htmlFor="speed-slider">Kecepatan (lebih rendah lebih cepat)</Label>
+                    <div className="flex items-center gap-4">
+                      <Slider
+                        id="speed-slider"
+                        min={10}
+                        max={60}
+                        step={1}
+                        value={[localSettings.runningText.speed]}
+                        onValueChange={(value) => setLocalSettings({ ...localSettings, runningText: { ...localSettings.runningText, speed: value[0] } })}
+                      />
+                      <span className="text-sm font-medium w-12 text-center">{localSettings.runningText.speed}s</span>
+                    </div>
+                  </div>
 
-              <div className="space-y-3">
-                <Label htmlFor="speed-slider">Kecepatan (lebih rendah lebih cepat)</Label>
-                <div className="flex items-center gap-4">
-                  <Slider
-                    id="speed-slider"
-                    min={10}
-                    max={60}
-                    step={1}
-                    value={[localSettings.runningText.speed]}
-                    onValueChange={(value) => setLocalSettings({ ...localSettings, runningText: { ...localSettings.runningText, speed: value[0] } })}
-                  />
-                  <span className="text-sm font-medium w-12 text-center">{localSettings.runningText.speed}s</span>
+                  <div className="space-y-2">
+                    <Label htmlFor="font-family-select">Jenis Font</Label>
+                    <Select
+                      value={localSettings.runningText.fontFamily}
+                      onValueChange={(value: 'sans' | 'serif' | 'mono') => setLocalSettings({ ...localSettings, runningText: { ...localSettings.runningText, fontFamily: value } })}
+                    >
+                      <SelectTrigger id="font-family-select">
+                        <SelectValue placeholder="Pilih font" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sans">Sans-serif</SelectItem>
+                        <SelectItem value="serif">Serif</SelectItem>
+                        <SelectItem value="mono">Monospace</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="font-family-select">Jenis Font</Label>
-                <Select
-                  value={localSettings.runningText.fontFamily}
-                  onValueChange={(value: 'sans' | 'serif' | 'mono') => setLocalSettings({ ...localSettings, runningText: { ...localSettings.runningText, fontFamily: value } })}
-                >
-                  <SelectTrigger id="font-family-select">
-                    <SelectValue placeholder="Pilih font" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sans">Sans-serif</SelectItem>
-                    <SelectItem value="serif">Serif</SelectItem>
-                    <SelectItem value="mono">Monospace</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
         <SheetFooter>
           <Button onClick={handleSave}>Simpan Perubahan</Button>
