@@ -50,13 +50,27 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortMode, setSortMode] = useState<'auto' | 'manual'>('auto');
 
-  // Effect for tab title
+  // Effect for running text tab title
   useEffect(() => {
+    let intervalId: NodeJS.Timeout | undefined;
+
     if (isPlaying && currentStation) {
-      document.title = `▶️ ${currentStation.name} - TERMINAL RADIO ERDE`;
+      const baseTitle = `▶️ ${currentStation.name} - TERMINAL RADIO ERDE `;
+      let index = 0;
+      intervalId = setInterval(() => {
+        document.title = baseTitle.substring(index) + baseTitle.substring(0, index);
+        index = (index + 1) % baseTitle.length;
+      }, 300);
     } else {
       document.title = 'TERMINAL RADIO ERDE';
     }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+      document.title = 'TERMINAL RADIO ERDE';
+    };
   }, [isPlaying, currentStation]);
 
   // Effect for Realtime Presence
