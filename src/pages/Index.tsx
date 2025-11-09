@@ -9,6 +9,10 @@ import { showError, showSuccess, showLoading, dismissToast } from '@/utils/toast
 import type { Session, RealtimeChannel } from '@supabase/supabase-js';
 import type { AppSettings } from '@/components/SettingsSheet';
 import RunningInfo from '@/components/RunningInfo';
+import { arrayMove } from '@dnd-kit/sortable';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface Station {
   id: number;
@@ -43,6 +47,17 @@ const Index = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [onlineCount, setOnlineCount] = useState(0);
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortMode, setSortMode] = useState<'auto' | 'manual'>('auto');
+
+  // Effect for tab title
+  useEffect(() => {
+    if (isPlaying && currentStation) {
+      document.title = `▶️ ${currentStation.name} - TERMINAL RADIO ERDE`;
+    } else {
+      document.title = 'TERMINAL RADIO ERDE';
+    }
+  }, [isPlaying, currentStation]);
 
   // Effect for Realtime Presence
   useEffect(() => {
@@ -142,6 +157,7 @@ const Index = () => {
       showError('Could not fetch radio stations.');
     } else if (data) {
       setStations(data);
+      setSortMode('auto');
       setSortOrder('asc');
     }
   };
@@ -150,10 +166,35 @@ const Index = () => {
     fetchStations();
   }, []);
 
+  const displayedStations = useMemo(() => {
+    let processedStations = [...stations];
+
+    if (sortMode === 'auto') {
+      processedStations.sort((a, b) => {
+        const cityA = a.city || '\uffff';
+        const cityB = b.city || '\uffff';
+        let comparison = cityA.localeCompare(cityB);
+        if (comparison === 0) {
+          comparison = a.name.localeCompare(b.name);
+        }
+        return sortOrder === 'asc' ? comparison : -comparison;
+      });
+    }
+
+    if (searchQuery) {
+      processedStations = processedStations.filter(station =>
+        station.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (station.city && station.city.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+    }
+
+    return processedStations;
+  }, [stations, sortMode, sortOrder, searchQuery]);
+
   const currentStationIndex = useMemo(() => {
     if (!currentStation) return -1;
-    return stations.findIndex(s => s.id === currentStation.id);
-  }, [currentStation, stations]);
+    return displayedStations.findIndex(s => s.id === currentStation.id);
+  }, [currentStation, displayedStations]);
 
   const handlePlayStation = (station: Station) => {
     if (currentStation?.id === station.id) {
@@ -171,16 +212,16 @@ const Index = () => {
   };
 
   const handleNext = () => {
-    if (stations.length === 0) return;
-    const nextIndex = (currentStationIndex + 1) % stations.length;
-    setCurrentStation(stations[nextIndex]);
+    if (displayedStations.length === 0) return;
+    const nextIndex = (currentStationIndex + 1) % displayedStations.length;
+    setCurrentStation(displayedStations[nextIndex]);
     setIsPlaying(true);
   };
 
   const handlePrevious = () => {
-    if (stations.length === 0) return;
-    const prevIndex = (currentStationIndex - 1 + stations.length) % stations.length;
-    setCurrentStation(stations[prevIndex]);
+    if (displayedStations.length === 0) return;
+    const prevIndex = (currentStationIndex - 1 + displayedStations.length) % displayedStations.length;
+    setCurrentStation(displayedStations[prevIndex]);
     setIsPlaying(true);
   };
 
@@ -230,26 +271,19 @@ const Index = () => {
     }
   };
 
-  const handleReorderStations = (reorderedStations: Station[]) => {
-    setStations(reorderedStations);
+  const handleReorderStations = (activeId: number, overId: number) => {
+    setSortMode('manual');
+    setStations((currentStations) => {
+      const oldIndex = currentStations.findIndex((s) => s.id === activeId);
+      const newIndex = currentStations.findIndex((s) => s.id === overId);
+      if (oldIndex === -1 || newIndex === -1) return currentStations;
+      return arrayMove(currentStations, oldIndex, newIndex);
+    });
   };
 
   const handleSortToggle = () => {
-    const newOrder = sortOrder === 'asc' ? 'desc' : 'asc';
-    const sortedStations = [...stations].sort((a, b) => {
-      const cityA = a.city || '\uffff'; // Use a high-value character to sort nulls/empty last
-      const cityB = b.city || '\uffff';
-
-      let comparison = cityA.localeCompare(cityB);
-      
-      if (comparison === 0) {
-        comparison = a.name.localeCompare(b.name);
-      }
-
-      return newOrder === 'asc' ? comparison : -comparison;
-    });
-    setStations(sortedStations);
-    setSortOrder(newOrder);
+    setSortMode('auto');
+    setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'));
   };
 
   const getBackgroundStyle = (): React.CSSProperties => {
@@ -296,9 +330,19 @@ const Index = () => {
               <AddStationDialog onAddStation={handleAddStation} />
             </div>
           )}
-          {stations.length > 0 && (
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Cari stasiun radio..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          {displayedStations.length > 0 ? (
             <StationList 
-              stations={stations} 
+              stations={displayedStations} 
               currentStationId={currentStation?.id || null}
               isPlaying={isPlaying}
               onPlay={handlePlayStation}
@@ -309,6 +353,14 @@ const Index = () => {
               sortOrder={sortOrder}
               onSortToggle={handleSortToggle}
             />
+          ) : (
+            <Card>
+              <CardContent>
+                <p className="text-center text-muted-foreground p-8">
+                  {searchQuery ? 'Tidak ada stasiun yang cocok.' : 'Tidak ada stasiun radio.'}
+                </p>
+              </CardContent>
+            </Card>
           )}
         </div>
       </main>

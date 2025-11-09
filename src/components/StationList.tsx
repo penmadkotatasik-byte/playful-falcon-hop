@@ -30,7 +30,6 @@ import {
   DragEndEvent,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
@@ -55,7 +54,7 @@ interface StationListProps {
   isAdmin: boolean;
   onDelete: (id: number) => void;
   onUpdate: (station: Station) => void;
-  onReorder: (stations: Station[]) => void;
+  onReorder: (activeId: number, overId: number) => void;
   sortOrder: 'asc' | 'desc';
   onSortToggle: () => void;
 }
@@ -155,9 +154,7 @@ const StationList = ({ stations, currentStationId, isPlaying, onPlay, isAdmin, o
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
-      const oldIndex = stations.findIndex((s) => s.id === active.id);
-      const newIndex = stations.findIndex((s) => s.id === over.id);
-      onReorder(arrayMove(stations, oldIndex, newIndex));
+      onReorder(active.id as number, over.id as number);
     }
   };
 
